@@ -256,7 +256,8 @@ def pretected_area():
 
 # Your ngrok url, obtained after running "ngrok http 5000"
 # URL = "https://679e4c83.ngrok.io"
-URL = "http://localhost:5000"
+# URL = "http://localhost:5000"
+URL = "https://flask-social-app-csv.herokuapp.com/"
 
 FB_CLIENT_ID = "259762062401630"
 FB_CLIENT_SECRET = "6b8a4fc54a76d6005fc742b4ace0ba5e"
