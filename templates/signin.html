@@ -1,0 +1,17 @@
+<form action="/signin_success" method="post">
+    {% if user %}
+    <h1>User Already Exist!!</h1>
+    Enter Username
+    <input type="text" name="user">
+    Enter password
+    <input type="password" name="pass">
+    <button type="submit">Signin</button>
+    {% else %}
+    Enter Username
+    <input type="text" name="user">
+    Enter password
+    <input type="password" name="pass">
+    <button type="submit">Signin</button>
+    {% endif %}
+
+</form>

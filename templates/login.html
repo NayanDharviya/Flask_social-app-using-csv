@@ -1,0 +1,25 @@
+<form action="/login_success" method="post">
+    {% if login %}
+    <h1>Please Enter Correct password</h1>
+    Enter Username
+    <input type="text" name="user">
+    Enter password
+    <input type="password" name="pass">
+    <button type="submit">Login</button>
+    {% elif user %}
+    <h1>Please Enter correct username</h1>
+    Enter Username
+    <input type="text" name="user">
+    Enter password
+    <input type="password" name="pass">
+    <button type="submit">Login</button>
+    {% else %}
+
+    Enter Username
+    <input type="text" name="user">
+    Enter password
+    <input type="password" name="pass">
+    <button type="submit">Login</button>
+    {% endif %}
+
+</form>
