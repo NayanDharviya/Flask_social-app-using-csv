@@ -1,30 +1,39 @@
+# standard library
 from flask import Flask, session, abort, redirect, request, render_template, session
 from google_auth_oauthlib.flow import Flow
 import os
+from datetime import timedelta, datetime
 import requests
 import pathlib
-from pip._vendor import cachecontrol
-from google.oauth2 import id_token
-import google.auth.transport.requests
+import flask
+import pandas as pd
 # from flask_mysqldb import MySQL
 # flask_mysqldb is used for mysql connectivity and doing queries using mysql workbench
 from flask import jsonify
 # jsonify library used for converting result comes from mysql queries into json format
 import json
-from datetime import timedelta, datetime
-import requests_oauthlib
-import flask
-from requests_oauthlib.compliance_fixes import facebook_compliance_fix
-import pandas as pd
 
+# third party library
+from pip._vendor import cachecontrol
+from google.oauth2 import id_token
+import google.auth.transport.requests
+import requests_oauthlib
+from requests_oauthlib.compliance_fixes import facebook_compliance_fix
+
+# local files
 global data
 data = pd.read_csv("data_csv.csv")
 
 
+# creating flask app objects
 app = Flask(__name__)
+
+# generating random secret key
 app.secret_key = "secret key"
 
+# --------------------------using database as a mysql workbench ----------------------------------
 
+# this is used when we have multiple environment to run the code
 # calling config file as per requirement
 # if app.config["ENV"] == "production":
 #     app.config.from_object("config.ProductionConfig")
@@ -34,7 +43,7 @@ app.secret_key = "secret key"
 #     app.config.from_object("config.TestingConfig")
 
 
-# reading config.json file
+# reading config.json file which contain database connectivity details
 # path = os.getcwd()+"\config.json"
 # conf = open("config.json")
 # conf_data = conf.read()
@@ -50,7 +59,6 @@ app.secret_key = "secret key"
 # app.config['MYSQL_PASSWORD'] = conf_data["MYSQL_PASSWORD"]
 # app.config['MYSQL_DB'] = conf_data["MYSQL_DB"]
 # mysql.init_app(app)
-
 
 
 # @app.route('/')
@@ -106,14 +114,23 @@ app.secret_key = "secret key"
 #                 return render_template("login.html", fail=fail)
                 
 
+# -------------------------------------using database as a csv file --------------------------------------
+
 def get_user():
+    ''' return all unique user name '''
     a = set()
+    
+    # data = pd.read_csv("data_csv.csv")
+
     data = pd.read_csv("data_csv.csv")
     for i in data['username']:
         a.add(i)
     return a
     
+
 def get_pass(user):
+    ''' return password for login authentication '''
+    data = pd.read_csv("data_csv.csv")
     pwd = data["password"].loc[data["username"] == user].iloc[0]
     print("password from get_pass",pwd)
     return pwd
@@ -121,14 +138,20 @@ def get_pass(user):
 
 @app.route("/")
 def home():
+    ''' home page for an app '''
     return render_template("home.html")
+ 
 
 @app.route("/signin")
 def signin():
+    ''' signin page of the app '''
     return render_template("signin.html")
+
 
 @app.route("/signin_success", methods=["POST"])
 def signin_success():
+
+''' check signin successfull or not, if successfull then insert the record into csv file '''
     if request.method == "POST":
         user = request.form["user"]
         password = request.form["pass"]
@@ -145,14 +168,20 @@ def signin_success():
 
 @app.route("/login")
 def login():
+    '''  login page for an app '''
     return render_template("login.html")
+
 
 @app.route("/login_success", methods=["POST"])
 def login_success():
+    ''' checking login authentication if login successfull then redirect to main page else throws error '''
     if request.method=="POST":
         user = request.form["user"]
         pwd  = request.form["pass"]
         print(user, pwd)
+        # password = get_pass(user)
+        # print("password from function",password)
+        # return "done"
         user_data = get_user()
         if user in user_data:
             password = get_pass(user)
@@ -166,10 +195,10 @@ def login_success():
             return render_template("login.html",user=True)
 
 
+# ------------------------------ google social login------------------------------------------
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-GOOGLE_CLIENT_ID = "600548504659-9uapv9g0cfhjsht48nh70oufji0e5q10.apps.googleusercontent.com"
+google_client_id = "600548504659-9uapv9g0cfhjsht48nh70oufji0e5q10.apps.googleusercontent.com"
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent,"client_secret.json")
 
 
@@ -181,9 +210,6 @@ flow = Flow.from_client_secrets_file(
     "openid"],
     redirect_uri="http://127.0.0.1:5000/callback"
 )
-
-
-
 
 # create decorator
 def login_is_required(function):
@@ -197,6 +223,7 @@ def login_is_required(function):
 
 @app.route("/google_login")
 def google_login():
+    '''  google login page '''
     authorization_url, state = flow.authorization_url()
     session['state']=state
     return redirect(authorization_url)
@@ -216,11 +243,16 @@ def callback():
     id_info = id_token.verify_oauth2_token(
         id_token = credentials._id_token,
         request=token_request,
-        audience=GOOGLE_CLIENT_ID
+        audience=google_client_id
     )
 
     
-    session['google_id'] = id_info.get("sub")
+    session['google_id'] = id_info.get("sub")        
+    session["name"] = id_info.get("name")
+    return redirect("/protected_area")
+
+# trying to implement google session timeout for google login user
+
     # if 'google_id' in session:
     #     app.permanent_session_lifetime = timedelta(seconds=5)
         # return redirect("/")
@@ -232,9 +264,6 @@ def callback():
         # print("session_id=",session['google_id'])
         # print("current_time=",start_time)
         # print("end _time =",end_time)
-    session["name"] = id_info.get("name")
-    return redirect("/protected_area")
-
 
 @app.route("/logout")
 def logout():
@@ -254,6 +283,12 @@ def pretected_area():
     return "Protected <a href='/logout'><button>Logout</button></a>"
 
 
+
+
+
+# --------------------------------------facebook social login page-----------------------------------------
+
+
 # Your ngrok url, obtained after running "ngrok http 5000"
 # URL = "https://679e4c83.ngrok.io"
 # URL = "http://localhost:5000"
@@ -262,7 +297,7 @@ URL = "https://flask-social-app-csv.herokuapp.com/"
 FB_CLIENT_ID = "259762062401630"
 FB_CLIENT_SECRET = "6b8a4fc54a76d6005fc742b4ace0ba5e"
 
-FB_AUTHORIZATION_BASE_URL = "https://www.facebook.com/dialog/oauth"
+fb_authorization_base_url = "https://www.facebook.com/dialog/oauth"
 FB_TOKEN_URL = "https://graph.facebook.com/oauth/access_token"
 
 FB_SCOPE = ["email"]
@@ -280,7 +315,7 @@ def fb_login():
     facebook = requests_oauthlib.OAuth2Session(
         FB_CLIENT_ID, redirect_uri=URL + "/fb-callback", scope=FB_SCOPE
     )
-    authorization_url, _ = facebook.authorization_url(FB_AUTHORIZATION_BASE_URL)
+    authorization_url, _ = facebook.authorization_url(fb_authorization_base_url)
 
     return flask.redirect(authorization_url)
 
@@ -322,6 +357,6 @@ def fb_callback():
     <a href="/">Home</a>
     """
 
-
+# running flask app
 if __name__ == "__main__":
     app.run(debug=True)
