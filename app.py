@@ -218,7 +218,7 @@ def google_login():
     return redirect(authorization_url)
 
 @app.route("/callback")
-def callback():
+def authorize():
     flow.fetch_token(authorization_response=request.url)
 
     if not session["state"] == request.args['state']:
@@ -281,7 +281,7 @@ def pretected_area():
 # Your ngrok url, obtained after running "ngrok http 5000"
 # URL = "https://679e4c83.ngrok.io"
 # URL = "http://localhost:5000"
-URL = "https://flask-social-app-csv.herokuapp.com/"
+URL = "https://flask-social-app-csv.herokuapp.com"
 
 FB_CLIENT_ID = "259762062401630"
 FB_CLIENT_SECRET = "6b8a4fc54a76d6005fc742b4ace0ba5e"
@@ -298,7 +298,6 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 # @app.route('/facebook_login')
 # def facebook_login():
 #     return redirect(url_for("/fb_login"))
-
 @app.route("/fb-login")
 def fb_login():
     facebook = requests_oauthlib.OAuth2Session(
@@ -309,7 +308,7 @@ def fb_login():
     return flask.redirect(authorization_url)
 
 @app.route("/fb-callback")
-def fb_callback():
+def callback():
     facebook = requests_oauthlib.OAuth2Session(
         FB_CLIENT_ID, scope=FB_SCOPE, redirect_uri=URL + "/fb-callback"
     )
@@ -333,18 +332,16 @@ def fb_callback():
     email = facebook_user_data["email"]
     name = facebook_user_data["name"]
     picture_url = facebook_user_data.get("picture", {}).get("data", {}).get("url")
-    # facebook user name and email store in db
-    # mycursor = mysql.connection.cursor()
-    # mycursor.execute("insert into userdata (user_name,user_email)values(%s,%s)", (name,email,))
-    # mysql.connection.commit()
+  
 
+    #login details
     return f"""
-    User information: <br>
-    Name: {name} <br>
-    Email: {email} <br>
-    Avatar <img src="{picture_url}"> <br>
-    <a href="/">Home</a>
-    """
+        User information: <br>
+        Name: {name} <br>
+        Email: {email} <br>
+        Avatar <img src="{picture_url}"> <br>
+        <a href="/">Home</a>
+        """
 
 # running flask app
 if __name__ == "__main__":
