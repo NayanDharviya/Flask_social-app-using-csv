@@ -116,42 +116,34 @@ app.secret_key = "secret key"
 
 # -------------------------------------using database as a csv file --------------------------------------
 
+# return all unique user name
 def get_user():
-    ''' return all unique user name '''
     a = set()
-    
-    # data = pd.read_csv("data_csv.csv")
-
     data = pd.read_csv("data_csv.csv")
     for i in data['username']:
         a.add(i)
     return a
     
-
+# return password for login authentication
 def get_pass(user):
-    ''' return password for login authentication '''
     data = pd.read_csv("data_csv.csv")
     pwd = data["password"].loc[data["username"] == user].iloc[0]
     print("password from get_pass",pwd)
     return pwd
 
-
+# home page for an app
 @app.route("/")
 def home():
-    ''' home page for an app '''
     return render_template("home.html")
- 
 
+# signin page of the app
 @app.route("/signin")
 def signin():
-    ''' signin page of the app '''
     return render_template("signin.html")
 
-
+# check signin successfull or not, if successfull then insert the record into csv file
 @app.route("/signin_success", methods=["POST"])
 def signin_success():
-
-''' check signin successfull or not, if successfull then insert the record into csv file '''
     if request.method == "POST":
         user = request.form["user"]
         password = request.form["pass"]
@@ -166,22 +158,19 @@ def signin_success():
             return render_template("/main.html",user=user)
         
 
+# login page for an app
 @app.route("/login")
 def login():
-    '''  login page for an app '''
     return render_template("login.html")
 
 
+# checking login authentication if login successfull then redirect to main page else throws error
 @app.route("/login_success", methods=["POST"])
 def login_success():
-    ''' checking login authentication if login successfull then redirect to main page else throws error '''
     if request.method=="POST":
         user = request.form["user"]
         pwd  = request.form["pass"]
         print(user, pwd)
-        # password = get_pass(user)
-        # print("password from function",password)
-        # return "done"
         user_data = get_user()
         if user in user_data:
             password = get_pass(user)
@@ -221,9 +210,9 @@ def login_is_required(function):
     return wrapper
 
 
+# google login page
 @app.route("/google_login")
 def google_login():
-    '''  google login page '''
     authorization_url, state = flow.authorization_url()
     session['state']=state
     return redirect(authorization_url)
