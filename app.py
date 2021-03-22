@@ -183,20 +183,19 @@ def login_success():
             if pwd == password:
                 dictionary["username"] = user
                 dictionary["password"] = pwd
-            return dictionary
                 #  {"username":user, "password":pwd}
-        #         return render_template("details.html", user=user)
-        #     else:
-        #         return render_template("login.html", login=True)
-        # else:
-        #     return render_template("login.html",user=True)
+                return render_template("details.html", user=user)
+            else:
+                return render_template("login.html", login=True)
+        else:
+            return render_template("login.html",user=True)
 
 @app.route("/details_success",methods=["POST"])
 def detail_success():
     if request.method == "POST":
         data = pd.read_csv("data_csv.csv")
         detail = pd.read_csv("details.csv")
-        print(dictionary)
+        print("dictionary=",dictionary["username"],dictionary["password"])
         json_data = request.form
         
         json_data = json_data.to_dict()
