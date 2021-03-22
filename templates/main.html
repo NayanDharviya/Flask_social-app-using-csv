@@ -3,13 +3,20 @@
 {% if user %}
 <!-- <h1> Sign in Successfull</h1> -->
 <h1>Welcome {{user}}</h1>
-<a href="/">Home</a>
-<!-- {% elif login==True %}
-<h1> Login in Successfull</h1> -->
-<!-- <h1>Main Page</h1> -->
-<!-- <h1>Welcome {{email}}</h1> -->
-<!-- <a href="/">Home</a> -->
-<!-- {% else %}
-<h1>Main Page</h1> -->
+<a href="/"><button>Home</button></a>
+<a href="/login"><button>Login</button></a>
+{% elif save %}
+
+<h1>Welcome {{user}}</h1>
+<h6>User data saved successfully</h6>
+<a href="/"><button>Home</button></a>
+<a href="/login"><button>Login</button></a>
+
+
+{% else %}
+
+<h1> no data</h1>
+
+
 
 {% endif %}

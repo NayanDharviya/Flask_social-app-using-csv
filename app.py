@@ -1,5 +1,5 @@
 # standard library
-from flask import Flask, session, abort, redirect, request, render_template, session
+from flask import Flask, session, abort, redirect, request, render_template, session, send_file
 from google_auth_oauthlib.flow import Flow
 import os
 from datetime import timedelta, datetime
@@ -23,7 +23,7 @@ from requests_oauthlib.compliance_fixes import facebook_compliance_fix
 # local files
 global data
 data = pd.read_csv("data_csv.csv")
-
+detail = pd.read_csv("details.csv")
 
 # creating flask app objects
 app = Flask(__name__)
@@ -144,15 +144,17 @@ def signin():
 # check signin successfull or not, if successfull then insert the record into csv file
 @app.route("/signin_success", methods=["POST"])
 def signin_success():
+    data = pd.read_csv("data_csv.csv")
     if request.method == "POST":
         user = request.form["user"]
         password = request.form["pass"]
+        email = request.form["email"]
         get_user_data = get_user()
         if user in get_user_data:
             user = True
             return render_template("/signin.html", user = user)
         else:
-            data1 =data.append({"username":user, "password":password}, ignore_index=True)
+            data1 =data.append({"username":user, "password":password,"email":email }, ignore_index=True)
             data1.to_csv("data_csv.csv", index=False)
             user=user
             return render_template("/main.html",user=user)
@@ -163,7 +165,8 @@ def signin_success():
 def login():
     return render_template("login.html")
 
-
+global dictionary 
+dictionary = {}
 # checking login authentication if login successfull then redirect to main page else throws error
 @app.route("/login_success", methods=["POST"])
 def login_success():
@@ -171,17 +174,50 @@ def login_success():
         user = request.form["user"]
         pwd  = request.form["pass"]
         print(user, pwd)
+        
         user_data = get_user()
         if user in user_data:
             password = get_pass(user)
         # print("password from login",str(password))
         # print("password from user", str(pwd))
             if pwd == password:
-                return render_template("main.html", user=user)
+                dictionary["username"] = user
+                dictionary["password"] = pwd
+                #  {"username":user, "password":pwd}
+                return render_template("details.html", user=user)
             else:
                 return render_template("login.html", login=True)
         else:
             return render_template("login.html",user=True)
+
+@app.route("/details_success",methods=["POST"])
+def detail_success():
+    if request.method == "POST":
+        data = pd.read_csv("data_csv.csv")
+        detail = pd.read_csv("details.csv")
+        print(dictionary)
+        json_data = request.form
+        
+        json_data = json_data.to_dict()
+        
+        if not json_data["num2"]:
+            del json_data["num2"]
+            
+        json_data["username"] = dictionary["username"]
+        json_data["email"] = data["email"].loc[data["username"] == json_data["username"]].iloc[0]
+
+
+        row = detail.append(json_data, ignore_index=True)
+        row.to_csv("details.csv",index = False)
+        
+        with open(dictionary["username"]+'_details.json',"w") as file_:
+            json.dump(json_data, file_, indent=4)
+
+        if request.form["action"] == "submit":
+            return render_template("main.html",user = json_data["username"], save = True)
+        else:
+            return send_file(dictionary["username"]+'_details.json',as_attachment=True)
+
 
 
 # ------------------------------ google social login------------------------------------------
@@ -270,8 +306,6 @@ def pretected_area():
     # app.permanent_session_lifetime = timedelta(seconds=5)
     # session.pop("google_id",None)
     return "Protected <a href='/logout'><button>Logout</button></a>"
-
-
 
 
 

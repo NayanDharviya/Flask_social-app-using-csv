@@ -1,17 +1,27 @@
 <form action="/signin_success" method="post">
     {% if user %}
-    <h1>User Already Exist!!</h1>
+    <h1>User Already Exist!!</h1><br>
     Enter Username
-    <input type="text" name="user">
+    <input type="text" name="user" required><br><br>
+    Enter Email
+    <input type="email" name="email" required><br><br>
     Enter password
-    <input type="password" name="pass">
+    <input type="password" name="pass" required><br><br>
     <button type="submit">Signin</button>
+    <!-- <a hred="/login"><button>Login</button></a> -->
     {% else %}
     Enter Username
-    <input type="text" name="user">
+    <input type="text" name="user" required><br><br>
+    Enter Email
+    <input type="email" name="email" required><br><br>
     Enter password
-    <input type="password" name="pass">
+    <input type="password" name="pass" required><br><br>
     <button type="submit">Signin</button>
     {% endif %}
 
+    
 </form>
+
+<a href="/login"><button>Login</button></a>
+
+<a href="/"><button>Home</button></a>

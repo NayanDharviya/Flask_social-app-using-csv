@@ -1,25 +1,29 @@
 <form action="/login_success" method="post">
     {% if login %}
-    <h1>Please Enter Correct password</h1>
+    <h1>Please Enter Correct password</h1><br><br>
     Enter Username
-    <input type="text" name="user">
+    <input type="text" name="user" required><br><br>
     Enter password
-    <input type="password" name="pass">
+    <input type="password" name="pass" required><br><br>
     <button type="submit">Login</button>
     {% elif user %}
-    <h1>Please Enter correct username</h1>
+    <h1>User not Exist</h1>
     Enter Username
-    <input type="text" name="user">
+    <input type="text" name="user" required><br><br>
     Enter password
-    <input type="password" name="pass">
+    <input type="password" name="pass" required><br><br>
     <button type="submit">Login</button>
+    <!-- <a href="/signin"><button>Signin</button></a> -->
     {% else %}
 
     Enter Username
-    <input type="text" name="user">
+    <input type="text" name="user" required><br><br>
     Enter password
-    <input type="password" name="pass">
+    <input type="password" name="pass" required><br><br>
     <button type="submit">Login</button>
     {% endif %}
 
 </form>
+
+<a href="/signin"><button>Signin</button></a>
+<a href="/"><button>Home</button></a>
